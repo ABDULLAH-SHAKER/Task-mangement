@@ -1,51 +1,44 @@
 'use client';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useRouter } from 'next/navigation'; // Use 'next/navigation' in App Router
-
+import { useRouter } from 'next/navigation'; 
+import './page.css';
+import 'boxicons';
 export default function Home() {
-  const router = useRouter(); // Initialize useRouter for navigation
+  const router = useRouter(); 
 
   const handleSubmit = (e) => {
-    e.preventDefault(); // Prevent default form behavior
-    // Redirect to the home page (app/page.js)
-    router.push('/');
+    e.preventDefault(); 
+    router.push('./Home'); 
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <form className="w-50" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="exampleInputEmail1">Email address</label>
-          <input
-            type="email"
-            className="form-control"
-            id="exampleInputEmail1"
-            aria-describedby="emailHelp"
-            placeholder="Enter email"
-          />
-          <small id="emailHelp" className="form-text text-muted">
-            We'll never share your email with anyone else.
-          </small>
-        </div>
-        <div className="form-group">
-          <label htmlFor="exampleInputPassword1">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            id="exampleInputPassword1"
-            placeholder="Password"
-          />
-        </div>
-        <div className="form-group form-check">
-          <input type="checkbox" className="form-check-input" id="exampleCheck1" />
-          <label className="form-check-label" htmlFor="exampleCheck1">
-            Check me out
-          </label>
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Submit
-        </button>
-      </form>
+    <div className="wrapper">
+  <form onSubmit={handleSubmit}>
+    <h1>Login</h1>
+    <div className="input-box">
+      <input type="text" placeholder="username" required="" />
+      <i className="bx bxs-user" />
+      <input type="password" placeholder="password" required="" />
+      <i className="bx bxs-lock-alt" />
     </div>
+    <div className="remember-forgot">
+      <label>
+        <input type="checkbox" />
+        remember me
+      </label>
+      <a href="#">Forgot password!</a>
+    </div>
+    <button type="submit" className="btn">
+      Login
+    </button>
+    <div className="register-link">
+      <p>
+        Don't have an account!
+        <a href="#">Register</a>
+      </p>
+    </div>
+  </form>
+</div>
+
   );
 }
