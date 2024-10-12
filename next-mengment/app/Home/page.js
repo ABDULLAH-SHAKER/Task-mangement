@@ -10,15 +10,20 @@ function TaskManager() {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState("");
   const [filter, setFilter] = useState("all");
+  const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const querySnapshot = await getDocs(collection(db, 'tasks'));
-      const fetchedTasks = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTasks(fetchedTasks);
+      try {
+        const querySnapshot = await getDocs(collection(db, 'tasks'));
+        const fetchedTasks = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTasks(fetchedTasks);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      }
     };
 
     fetchTasks();
@@ -83,6 +88,14 @@ function TaskManager() {
     }
     return true; 
   });
+
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+  };
+
+  const handleCloseCard = () => {
+    setSelectedTask(null); 
+  };
 
   return (
     <section className="vh-100 gradient-custom">
@@ -163,7 +176,8 @@ function TaskManager() {
                     <li
                       key={task.id} 
                       className="list-group-item d-flex flex-column align-items-start border-0 mb-2 rounded"
-                      style={{ backgroundColor: "#f4f6f7" }}
+                      style={{ backgroundColor: "#f4f6f7", cursor: 'pointer' }} 
+                      onClick={() => handleTaskClick(task)} 
                     >
                       <div className="d-flex w-100 align-items-center mb-2">
                         <input
@@ -182,6 +196,18 @@ function TaskManager() {
                     </li>
                   ))}
                 </ul>
+
+                {selectedTask && (
+                  <div className="card mt-4">
+                    <div className="card-body">
+                      <h5 className="card-title">{selectedTask.text}</h5>
+                      <p className="card-text"><strong>Description:</strong> {selectedTask.description}</p>
+                      <p className="card-text"><strong>Due Date:</strong> {selectedTask.date}</p>
+                      <p className="card-text"><strong>Status:</strong> {selectedTask.completed ? "Done" : "To Do"}</p>
+                      <button className="btn btn-danger" onClick={handleCloseCard}>Close</button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

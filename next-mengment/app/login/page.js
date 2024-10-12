@@ -2,7 +2,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '../Firebase'; // Adjust the path to your firebase config
+import { auth } from '../Firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import './login.css'; 
 
@@ -17,10 +17,9 @@ export default function LoginPage() {
     
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // Redirect to the home page or task manager after successful login
-      router.push('/Home'); // Adjust the route as needed
+      router.push('/Home');
     } catch (error) {
-      setError(error.message); // Set error message to state
+      setError(error.message);
     }
   };
 
@@ -53,7 +52,7 @@ export default function LoginPage() {
         <div className="register-link">
           <p>
             Don't have an account?
-            <a href="/signup"> Register</a> {/* Link to the registration page */}
+            <a href="/signup"> Register</a> 
           </p>
         </div>
       </form>
