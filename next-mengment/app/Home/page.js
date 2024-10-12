@@ -12,7 +12,7 @@ function TaskManager() {
   const [filter, setFilter] = useState("all");
   const handleSubmit = (e) => {
     e.preventDefault(); 
-    router.push('/signup'); 
+    Router.push('/signup'); 
   };
 
   useEffect(() => {
