@@ -1,8 +1,7 @@
-// firebase.js
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyA03ZZHbx1ZOPTqP6hQy2XDXh4WvA6hbYk",
     authDomain: "next-1-3dbdb.firebaseapp.com",
@@ -11,10 +10,10 @@ const firebaseConfig = {
     messagingSenderId: "246981926639",
     appId: "1:246981926639:web:f5494a1e6a8fdec3ff851a"
   };
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// Initialize Firebase Authentication
 const auth = getAuth(app);
 
 export { auth };
+export {db};

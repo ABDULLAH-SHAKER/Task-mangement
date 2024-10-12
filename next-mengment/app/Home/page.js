@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react'; 
+import { db } from '../Firebase'; 
+import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore'; 
 import './page.css';
-import { useRouter } from 'next/navigation';
-import { Router } from 'next/router';
 
 function TaskManager() {
   const [tasks, setTasks] = useState([]);
@@ -10,45 +10,66 @@ function TaskManager() {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState("");
   const [filter, setFilter] = useState("all");
-  const handleSubmit = (e) => {
-    e.preventDefault(); 
-    Router.push('/signup'); 
-  };
 
   useEffect(() => {
-    const storedTasks = localStorage.getItem('tasks');
-    if (storedTasks) {
-      setTasks(JSON.parse(storedTasks)); 
-    }
+    const fetchTasks = async () => {
+      const querySnapshot = await getDocs(collection(db, 'tasks'));
+      const fetchedTasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTasks(fetchedTasks);
+    };
+
+    fetchTasks();
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-  }, [tasks]);
 
   const handleTaskChange = (e) => setNewTask(e.target.value);
   const handleDescriptionChange = (e) => setTaskDescription(e.target.value);
   const handleDateChange = (e) => setTaskDate(e.target.value);
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault(); 
 
     if (newTask.trim() !== "" && taskDate !== "") {
-      setTasks([
-        ...tasks,
-        { text: newTask, description: taskDescription, date: taskDate, completed: false },
-      ]);
-      setNewTask("");
-      setTaskDescription("");
-      setTaskDate("");
+      try {
+        const docRef = await addDoc(collection(db, 'tasks'), {
+          text: newTask,
+          description: taskDescription,
+          date: taskDate,
+          completed: false,
+        });
+
+        setTasks((prevTasks) => [
+          ...prevTasks,
+          { id: docRef.id, text: newTask, description: taskDescription, date: taskDate, completed: false },
+        ]);
+
+        setNewTask("");
+        setTaskDescription("");
+        setTaskDate("");
+      } catch (error) {
+        console.error('Error adding task:', error);
+      }
     }
   };
 
-  const toggleTaskCompletion = (index) => {
-    const updatedTasks = tasks.map((task, i) =>
-      i === index ? { ...task, completed: !task.completed } : task
-    );
-    setTasks(updatedTasks);
+  const toggleTaskCompletion = async (index) => {
+    const taskToUpdate = tasks[index];
+    const updatedTask = { ...taskToUpdate, completed: !taskToUpdate.completed };
+
+    try {
+      await updateDoc(doc(db, 'tasks', taskToUpdate.id), {
+        completed: updatedTask.completed,
+      });
+      
+      const updatedTasks = tasks.map((task, i) =>
+        i === index ? updatedTask : task
+      );
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error('Error updating task completion:', error);
+    }
   };
 
   const filteredTasks = tasks.filter((task) => {
@@ -135,16 +156,12 @@ function TaskManager() {
                   <button type="submit" className="btn btn-info btn-block">
                     Add Task
                   </button>
-                  <button onSubmit={handleSubmit} className="btn btn-danger">
-                    Logout
-                    </button>
-
                 </form>
                 
                 <ul className="list-group mb-0">
                   {filteredTasks.map((task, index) => (
                     <li
-                      key={index}
+                      key={task.id} 
                       className="list-group-item d-flex flex-column align-items-start border-0 mb-2 rounded"
                       style={{ backgroundColor: "#f4f6f7" }}
                     >
@@ -156,7 +173,6 @@ function TaskManager() {
                           onChange={() => toggleTaskCompletion(index)}
                           aria-label="..."
                         />
-                        
                         <strong>{task.completed ? <s>{task.text}</s> : task.text}</strong>
                       </div>
                       <small className="text-muted">
