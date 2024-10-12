@@ -2,33 +2,32 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '../Firebase'; 
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import './page.css';
-import 'boxicons';
+import { auth } from '../Firebase'; // Adjust the path to your firebase config
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import './login.css'; 
 
-export default function Signup() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const router = useRouter();
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter(); 
 
-  const handleSignup = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); 
-
+    
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      router.push('./Home'); 
-    } catch (err) {
-      setError(err.message); 
+      await signInWithEmailAndPassword(auth, email, password);
+      // Redirect to the home page or task manager after successful login
+      router.push('/Home'); // Adjust the route as needed
+    } catch (error) {
+      setError(error.message); // Set error message to state
     }
   };
 
   return (
     <div className="wrapper">
-      <form onSubmit={handleSignup}>
-        <h1>Register</h1>
+      <form onSubmit={handleSubmit}>
+        <h1>Login</h1>
         <div className="input-box">
           <input
             type="email"
@@ -49,12 +48,12 @@ export default function Signup() {
         </div>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button type="submit" className="btn">
-          Register
+          Login
         </button>
         <div className="register-link">
           <p>
-            Already have an account!
-            <a href="./login"> Login</a>
+            Don't have an account?
+            <a href="/signup"> Register</a> {/* Link to the registration page */}
           </p>
         </div>
       </form>
