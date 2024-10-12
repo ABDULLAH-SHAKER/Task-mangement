@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react'; 
+import { useRouter } from 'next/navigation'; 
 import { db } from '../Firebase'; 
-import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore'; 
+import { collection, addDoc, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore'; 
 import './page.css';
 
 function TaskManager() {
@@ -10,20 +11,17 @@ function TaskManager() {
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDate, setTaskDate] = useState("");
   const [filter, setFilter] = useState("all");
-  const [selectedTask, setSelectedTask] = useState(null);
+  
+  const router = useRouter(); 
 
   useEffect(() => {
     const fetchTasks = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'tasks'));
-        const fetchedTasks = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setTasks(fetchedTasks);
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
+      const querySnapshot = await getDocs(collection(db, 'tasks'));
+      const fetchedTasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTasks(fetchedTasks);
     };
 
     fetchTasks();
@@ -77,6 +75,15 @@ function TaskManager() {
     }
   };
 
+  const deleteTask = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'tasks', id));
+      setTasks(tasks.filter((task) => task.id !== id));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
   const filteredTasks = tasks.filter((task) => {
     if (filter === "today") {
       const today = new Date().toISOString().split("T")[0];
@@ -89,12 +96,8 @@ function TaskManager() {
     return true; 
   });
 
-  const handleTaskClick = (task) => {
-    setSelectedTask(task);
-  };
-
-  const handleCloseCard = () => {
-    setSelectedTask(null); 
+  const handleShowList = () => {
+    router.push('/list');
   };
 
   return (
@@ -176,8 +179,7 @@ function TaskManager() {
                     <li
                       key={task.id} 
                       className="list-group-item d-flex flex-column align-items-start border-0 mb-2 rounded"
-                      style={{ backgroundColor: "#f4f6f7", cursor: 'pointer' }} 
-                      onClick={() => handleTaskClick(task)} 
+                      style={{ backgroundColor: "#f4f6f7" }}
                     >
                       <div className="d-flex w-100 align-items-center mb-2">
                         <input
@@ -188,6 +190,9 @@ function TaskManager() {
                           aria-label="..."
                         />
                         <strong>{task.completed ? <s>{task.text}</s> : task.text}</strong>
+                        <button className="btn btn-danger btn-sm ms-3" onClick={() => deleteTask(task.id)}>
+                          Delete
+                        </button>
                       </div>
                       <small className="text-muted">
                         <span><b>Due:</b> {task.date}</span><br />
@@ -197,17 +202,10 @@ function TaskManager() {
                   ))}
                 </ul>
 
-                {selectedTask && (
-                  <div className="card mt-4">
-                    <div className="card-body">
-                      <h5 className="card-title">{selectedTask.text}</h5>
-                      <p className="card-text"><strong>Description:</strong> {selectedTask.description}</p>
-                      <p className="card-text"><strong>Due Date:</strong> {selectedTask.date}</p>
-                      <p className="card-text"><strong>Status:</strong> {selectedTask.completed ? "Done" : "To Do"}</p>
-                      <button className="btn btn-danger" onClick={handleCloseCard}>Close</button>
-                    </div>
-                  </div>
-                )}
+                <button className="btn btn-primary mt-3" onClick={handleShowList}>
+                  Show List
+                </button>
+                
               </div>
             </div>
           </div>
